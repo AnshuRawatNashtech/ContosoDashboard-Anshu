@@ -58,6 +58,22 @@ function Get-CurrentBranch {
     return "main"
 }
 
+function Resolve-TemplateContent {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$TemplateName,
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot
+    )
+
+    $templatePath = Join-Path $RepoRoot ".specify/templates/$TemplateName.md"
+    if (Test-Path -Path $templatePath -PathType Leaf) {
+        return Get-Content -Path $templatePath -Raw
+    }
+
+    return $null
+}
+
 function Test-HasGit {
     try {
         git rev-parse --show-toplevel 2>$null | Out-Null

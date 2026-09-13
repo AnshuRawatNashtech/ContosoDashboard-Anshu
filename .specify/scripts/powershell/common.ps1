@@ -74,6 +74,22 @@ function Resolve-TemplateContent {
     return $null
 }
 
+function Resolve-Template {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$TemplateName,
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot
+    )
+
+    $templatePath = Join-Path $RepoRoot ".specify/templates/$TemplateName.md"
+    if (Test-Path -Path $templatePath -PathType Leaf) {
+        return $templatePath
+    }
+
+    return $null
+}
+
 function Test-HasGit {
     try {
         git rev-parse --show-toplevel 2>$null | Out-Null

@@ -5,18 +5,18 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Create the `ContosoDocumentScanner.Functions/` .NET isolated worker project and add it to `ContosoDashboard.sln` with Azure Functions host v4 configuration in `ContosoDocumentScanner.Functions/ContosoDocumentScanner.Functions.csproj` and `ContosoDocumentScanner.Functions/host.json`
-- [ ] T002 [P] Create local scanner configuration placeholders, excluding secrets, in `ContosoDocumentScanner.Functions/local.settings.json.example` and document required queue/storage settings in `specs/001-document-upload-management/quickstart.md`
-- [ ] T003 [P] Add the document runtime storage root and quarantine/available directory configuration keys to `ContosoDashboard/appsettings.json` and `ContosoDashboard/appsettings.Development.json`
+- [X] T001 Create the `ContosoDocumentScanner.Functions/` .NET isolated worker project and add it to `ContosoDashboard.sln` with Azure Functions host v4 configuration in `ContosoDocumentScanner.Functions/ContosoDocumentScanner.Functions.csproj` and `ContosoDocumentScanner.Functions/host.json`
+- [X] T002 [P] Create local scanner configuration placeholders, excluding secrets, in `ContosoDocumentScanner.Functions/local.settings.json.example` and document required queue/storage settings in `specs/001-document-upload-management/quickstart.md`
+- [X] T003 [P] Add the document runtime storage root and quarantine/available directory configuration keys to `ContosoDashboard/appsettings.json` and `ContosoDashboard/appsettings.Development.json`
 
 ## Phase 2: Foundational
 
-- [ ] T004 Add integer-key document entities, relationships, validation attributes, and scan state fields to `ContosoDashboard/Models/Document.cs`, `ContosoDashboard/Models/DocumentShare.cs`, `ContosoDashboard/Models/DocumentActivity.cs`, and `ContosoDashboard/Models/DocumentTaskAssociation.cs`
-- [ ] T005 Add document DbSets, relationships, indexes, delete behavior, and notification enum values to `ContosoDashboard/Data/ApplicationDbContext.cs` and `ContosoDashboard/Models/Notification.cs`
-- [ ] T006 [P] Add storage, scanner, and queue message contracts in `ContosoDashboard/Services/FileStorageService.cs`, `ContosoDashboard/Services/FileScannerService.cs`, and `ContosoDashboard/Services/ScanQueueService.cs`; define the message fields `DocumentId`, `StorageKey`, `ScanAttempt`, and `RequestedUtc`
-- [ ] T007 [P] Register document, storage, scanner, queue, and audit services in `ContosoDashboard/Program.cs` using local implementations by default and configuration seams for production adapters
-- [ ] T008 Add centralized document authorization helpers for owner, project member, project manager, recipient, and administrator checks in `ContosoDashboard/Services/DocumentAuthorizationService.cs`; ensure direct document identifiers are always re-authorized
-- [ ] T009 Create a focused test project or test harness for document service and scan state transitions in `tests/ContosoDashboard.DocumentTests/ContosoDashboard.DocumentTests.csproj`, including in-memory/local storage doubles and deterministic scanner results
+- [X] T004 Add integer-key document entities, relationships, validation attributes, and scan state fields to `ContosoDashboard/Models/Document.cs`, `ContosoDashboard/Models/DocumentShare.cs`, `ContosoDashboard/Models/DocumentActivity.cs`, and `ContosoDashboard/Models/DocumentTaskAssociation.cs`
+- [X] T005 Add document DbSets, relationships, indexes, delete behavior, and notification enum values to `ContosoDashboard/Data/ApplicationDbContext.cs` and `ContosoDashboard/Models/Notification.cs`
+- [X] T006 [P] Add storage, scanner, and queue message contracts in `ContosoDashboard/Services/FileStorageService.cs`, `ContosoDashboard/Services/FileScannerService.cs`, and `ContosoDashboard/Services/ScanQueueService.cs`; define the message fields `DocumentId`, `StorageKey`, `ScanAttempt`, and `RequestedUtc`
+- [X] T007 [P] Register document, storage, scanner, queue, and audit services in `ContosoDashboard/Program.cs` using local implementations by default and configuration seams for production adapters
+- [X] T008 Add centralized document authorization helpers for owner, project member, project manager, recipient, and administrator checks in `ContosoDashboard/Services/DocumentAuthorizationService.cs`; ensure direct document identifiers are always re-authorized
+- [X] T009 Create a focused test project or test harness for document service and scan state transitions in `tests/ContosoDashboard.DocumentTests/ContosoDashboard.DocumentTests.csproj`, including in-memory/local storage doubles and deterministic scanner results
 
 ## Phase 3: User Story 1 - Upload and Organize Work Documents (Priority: P1) 🎯 MVP
 
@@ -24,16 +24,16 @@
 
 **Independent Test**: Upload a valid PDF under 25 MB as an authenticated employee, verify `PendingScan`, process the scan message, verify `Clean` and My Documents visibility, then verify oversized, unsupported, and rejected files remain inaccessible.
 
-- [ ] T010 [P] [US1] Implement generated relative quarantine and available storage keys, safe filenames, stream upload/download/delete, and path traversal protection in `ContosoDashboard/Services/FileStorageService.cs`
-- [ ] T011 [P] [US1] Implement supported MIME/extension validation, 25 MB per-file validation, required title/category validation, and deterministic local clean/rejected/unavailable scanner behavior in `ContosoDashboard/Services/FileScannerService.cs`
-- [ ] T012 [US1] Implement `DocumentService.UploadAsync` to validate authorization, write the file to quarantine before metadata commit, persist `PendingScan`, publish one scan message, and clean up uncommitted storage failures in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T010 [P] [US1] Implement generated relative quarantine and available storage keys, safe filenames, stream upload/download/delete, and path traversal protection in `ContosoDashboard/Services/FileStorageService.cs`
+- [X] T011 [P] [US1] Implement supported MIME/extension validation, 25 MB per-file validation, required title/category validation, and deterministic local clean/rejected/unavailable scanner behavior in `ContosoDashboard/Services/FileScannerService.cs`
+- [X] T012 [US1] Implement `DocumentService.UploadAsync` to validate authorization, write the file to quarantine before metadata commit, persist `PendingScan`, publish one scan message, and clean up uncommitted storage failures in `ContosoDashboard/Services/DocumentService.cs`
 - [ ] T013 [US1] Implement the .NET isolated Queue Storage-triggered scan worker to read only the referenced quarantine object, invoke scanning, promote clean content, persist `Clean`/`Rejected`/`ScanUnavailable`, and remain idempotent in `ContosoDocumentScanner.Functions/ScanQuarantinedFileFunction.cs`
-- [ ] T014 [US1] Configure bounded queue retries, visibility timeout, poison-queue handling, and Application Insights logging for scan failures in `ContosoDocumentScanner.Functions/host.json` and `ContosoDocumentScanner.Functions/ScanQuarantinedFileFunction.cs`
-- [ ] T015 [US1] Add the local queue adapter that executes the same scan message and state transition contract without cloud services in `ContosoDashboard/Services/ScanQueueService.cs`
-- [ ] T016 [US1] Implement My Documents and project document queries with server-side paging, category/project/date filters, title/date/category/size sorting, and exclusion of non-clean documents in `ContosoDashboard/Services/DocumentService.cs`
-- [ ] T017 [US1] Build the authenticated upload and document browsing UI with multi-file selection, `@key` InputFile reset, copied browser streams, metadata fields, progress/results, pending scan status, and project/category filters in `ContosoDashboard/Pages/Documents.razor`
-- [ ] T018 [US1] Add project document listing and authorized upload entry points to `ContosoDashboard/Pages/ProjectDetails.razor`
-- [ ] T019 [US1] Add document service transition tests for valid upload, unsupported type, over-25-MB rejection, quarantine-before-metadata ordering, pending visibility, clean promotion, and rejected scan behavior in `tests/ContosoDashboard.DocumentTests/DocumentUploadTests.cs`
+- [X] T014 [US1] Configure bounded queue retries, visibility timeout, poison-queue handling, and Application Insights logging for scan failures in `ContosoDocumentScanner.Functions/host.json` and `ContosoDocumentScanner.Functions/ScanQuarantinedFileFunction.cs`
+- [X] T015 [US1] Add the local queue adapter that executes the same scan message and state transition contract without cloud services in `ContosoDashboard/Services/ScanQueueService.cs`
+- [X] T016 [US1] Implement My Documents and project document queries with server-side paging, category/project/date filters, title/date/category/size sorting, and exclusion of non-clean documents in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T017 [US1] Build the authenticated upload and document browsing UI with multi-file selection, `@key` InputFile reset, copied browser streams, metadata fields, progress/results, pending scan status, and project/category filters in `ContosoDashboard/Pages/Documents.razor`
+- [X] T018 [US1] Add project document listing and authorized upload entry points to `ContosoDashboard/Pages/ProjectDetails.razor`
+- [X] T019 [US1] Add document service transition tests for valid upload, unsupported type, over-25-MB rejection, quarantine-before-metadata ordering, pending visibility, clean promotion, and rejected scan behavior in `tests/ContosoDashboard.DocumentTests/DocumentUploadTests.cs`
 
 **Checkpoint**: A clean scanned document can be uploaded and found by its owner or authorized project members; unscanned or rejected content is never accessible.
 

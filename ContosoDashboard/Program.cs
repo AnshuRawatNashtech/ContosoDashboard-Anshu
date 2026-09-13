@@ -3,6 +3,7 @@ using ContosoDashboard.Data;
 using ContosoDashboard.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,16 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 // Configure Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<DocumentStorageOptions>(builder.Configuration.GetSection("DocumentStorage"));
+builder.Services.AddSingleton<LocalScanQueueService>();
+builder.Services.AddSingleton<IScanQueue>(services => services.GetRequiredService<LocalScanQueueService>());
+builder.Services.AddHostedService(services => services.GetRequiredService<LocalScanQueueService>());
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddScoped<IFileScanner, LocalFileScanner>();
+builder.Services.AddScoped<IDocumentScanProcessor, DocumentScanProcessor>();
+builder.Services.AddScoped<DocumentAuthorizationService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 // Configure Mock Authentication (Cookie-based for training purposes)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -57,6 +68,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.EnsureCreated(); // For development - use migrations in production
+        DocumentSchemaInitializer.EnsureCreated(context);
     }
     catch (Exception ex)
     {
